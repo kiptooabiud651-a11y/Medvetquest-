@@ -1,0 +1,1111 @@
+```html
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedVet Quest & Clinical Academy</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        med: { 500: '#0284c7', 600: '#0369a1', 700: '#075985', 900: '#0f172a' },
+                        vet: { 500: '#059669', 600: '#047857', 700: '#065f46', 900: '#064e3b' }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; user-select: none; }
+        .font-mono-vital { font-family: 'JetBrains Mono', monospace; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+        .telemetry-grid {
+            background-size: 20px 20px;
+            background-image: linear-gradient(to right, rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+        }
+        @keyframes pulse-heart {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.2); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.1); }
+            60% { transform: scale(1); }
+            100% { transform: scale(1); }
+        }
+        .heart-beat { animation: pulse-heart 1.2s infinite; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- TOP NAV BAR -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 px-4 py-2.5 shadow-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            
+            <!-- Logo & Track Indicator -->
+            <div class="flex items-center space-x-3">
+                <div id="track-logo-badge" class="bg-sky-600 text-white p-2 rounded-xl flex items-center justify-center shadow-md">
+                    <i id="track-logo-icon" class="fa-solid fa-user-doctor text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-white flex items-center gap-2">
+                        MedVet Quest
+                        <span id="track-pill" class="text-[10px] bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full font-mono font-semibold uppercase">HUMAN MEDICINE TRACK</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400">Clinical Education & Gamified Board Review</p>
+                </div>
+            </div>
+
+            <!-- Stats Header (XP, Level, Streak) & Track Selector -->
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                
+                <!-- Track Switcher -->
+                <div class="bg-slate-950 p-1 rounded-lg border border-slate-800 flex text-xs">
+                    <button id="btn-track-human" onclick="setTrack('human')" class="px-3 py-1.5 rounded-md font-semibold text-white bg-sky-600 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-stethoscope"></i> <span class="hidden sm:inline">Human (MD)</span>
+                    </button>
+                    <button id="btn-track-vet" onclick="setTrack('vet')" class="px-3 py-1.5 rounded-md font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-paw"></i> <span class="hidden sm:inline">Vet (DVM)</span>
+                    </button>
+                </div>
+
+                <!-- User Level & XP Bar -->
+                <div class="hidden md:flex items-center bg-slate-800/80 border border-slate-700/80 rounded-lg px-3 py-1.5 space-x-3 text-xs">
+                    <div class="flex items-center space-x-1.5 text-amber-400 font-bold">
+                        <i class="fa-solid fa-trophy"></i>
+                        <span>Lvl <span id="user-level">1</span></span>
+                    </div>
+                    <div class="w-24 bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                        <div id="user-xp-bar" class="bg-gradient-to-r from-amber-500 to-emerald-400 h-full w-[20%] transition-all duration-300"></div>
+                    </div>
+                    <span id="user-xp-text" class="text-[10px] text-slate-400 font-mono">120/500 XP</span>
+                </div>
+
+                <!-- Streak Counter -->
+                <div class="flex items-center bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-2.5 py-1.5 rounded-lg font-bold space-x-1">
+                    <i class="fa-solid fa-fire text-amber-500"></i>
+                    <span id="user-streak">1 Day Streak</span>
+                </div>
+
+                <!-- User Profile Modal Trigger -->
+                <button onclick="openProfileModal()" class="text-slate-300 hover:text-white bg-slate-800 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-user-gear text-sky-400"></i>
+                    <span class="hidden sm:inline">Profile</span>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="text-slate-400 hover:text-white p-2 rounded-lg border border-slate-800 hover:bg-slate-800 transition">
+                    <i id="theme-icon" class="fa-solid fa-moon text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- PWA INSTALLATION BANNER -->
+    <div id="pwa-install-banner" class="hidden bg-gradient-to-r from-sky-900 via-slate-900 to-emerald-900 border-b border-sky-500/30 px-4 py-2 text-xs flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-mobile-screen-button text-sky-400 text-sm"></i>
+            <span>Install <strong>MedVet Quest</strong> on your home screen for offline clinical practice!</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-pwa-install" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition">Install App</button>
+            <button onclick="dismissPWAInstall()" class="text-slate-400 hover:text-white px-1"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+                <!-- Theme Toggle -->
+                <button onclick="toggleTheme()" class="text-slate-400 hover:text-white p-2 rounded-lg border border-slate-800 hover:bg-slate-800 transition">
+                    <i id="theme-icon" class="fa-solid fa-moon text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP WRAPPER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-4 md:p-6 flex flex-col gap-4">
+
+        <!-- NAV TABS FOR MODES -->
+        <nav class="bg-slate-900 border border-slate-800 rounded-xl p-1.5 flex items-center justify-between overflow-x-auto shadow-sm">
+            <div class="flex space-x-1 min-w-max">
+                <button id="nav-mode-curriculum" onclick="switchMode('curriculum')" class="px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 bg-sky-600 text-white shadow-sm transition">
+                    <i class="fa-solid fa-book-bookmark"></i> Course Curriculum
+                </button>
+                <button id="nav-mode-cases" onclick="switchMode('cases')" class="px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-hospital-user"></i> Clinical Simulator
+                </button>
+                <button id="nav-mode-quiz" onclick="switchMode('quiz')" class="px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-brain"></i> Mastery Quiz
+                </button>
+                <button id="nav-mode-vislab" onclick="switchMode('vislab')" class="px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-microscope"></i> Visual & Anatomic Lab
+                </button>
+            </div>
+
+            <!-- Species Selector Badge (For Vet Mode) -->
+            <div id="species-selector-wrapper" class="hidden items-center gap-1 text-xs pl-2">
+                <span class="text-slate-400 text-[11px] font-mono">Species:</span>
+                <select id="species-select" onchange="changeVetSpecies(this.value)" class="bg-slate-950 border border-slate-700 text-emerald-400 text-xs rounded-lg px-2 py-1 font-semibold focus:outline-none">
+                    <option value="Canine">Canine 🐶</option>
+                    <option value="Feline">Feline 🐱</option>
+                    <option value="Equine">Equine 🐴</option>
+                    <option value="Bovine">Bovine 🐮</option>
+                    <option value="Avian">Avian 🦜</option>
+                </select>
+            </div>
+        </nav>
+
+        <!-- MODE 1: COURSE CURRICULUM HUB -->
+        <section id="view-curriculum" class="space-y-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-4 mb-4 gap-3">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-graduation-cap text-sky-400"></i> Core Medical & Veterinary Disciplines
+                        </h2>
+                        <p class="text-xs text-slate-400">Select a course module to review high-yield concepts, board review notes, and anatomical breakdowns.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-slate-400">Total Disciplines: <strong class="text-sky-400">6 Modules</strong></span>
+                    </div>
+                </div>
+
+                <!-- Disciplines Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="disciplines-grid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- MODE 2: CLINICAL SIMULATOR (CASES) -->
+        <section id="view-cases" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-4">
+            
+            <!-- Left Panel: Patient Card & Telemetry (4 Cols) -->
+            <div class="lg:col-span-4 flex flex-col gap-4">
+                
+                <!-- Patient Info Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span id="case-species-tag" class="text-[10px] font-mono uppercase tracking-wider text-sky-400 bg-sky-950 border border-sky-800 px-2 py-0.5 rounded font-bold">HUMAN PATIENT</span>
+                            <h2 id="case-pt-name" class="text-lg font-bold text-slate-100 mt-1">Robert Vance</h2>
+                            <p id="case-pt-demo" class="text-xs text-slate-400">64 yo Male • MRN: #994-012</p>
+                        </div>
+                        <span id="case-stability-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> STABLE
+                        </span>
+                    </div>
+
+                    <div class="border-t border-slate-800/80 pt-3 mt-2 text-xs space-y-1.5">
+                        <div class="flex justify-between text-slate-300">
+                            <span class="text-slate-400">Chief Complaint:</span>
+                            <span id="case-pt-cc" class="font-semibold text-amber-300 text-right">"Crushing chest pressure"</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span class="text-slate-400">Allergies:</span>
+                            <span id="case-pt-allergies" class="font-medium text-slate-200">Penicillin</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Vitals Telemetry Box -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 telemetry-grid relative">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
+                            <h3 class="text-xs font-mono font-bold tracking-wider text-emerald-400 uppercase">Live Telemetry</h3>
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-500">ECG LEAD II</span>
+                    </div>
+
+                    <div class="w-full h-10 mb-3 bg-slate-900/60 rounded border border-slate-800/50 overflow-hidden relative flex items-center">
+                        <svg class="w-full h-full text-emerald-500 opacity-80" viewBox="0 0 500 50" preserveAspectRatio="none">
+                            <path d="M 0,25 Q 20,25 40,25 T 80,25 L 90,10 L 98,42 L 106,5 L 115,30 L 125,25 T 180,25 Q 200,25 220,25 T 260,25 L 270,12 L 278,40 L 286,8 L 295,28 L 305,25 T 360,25 Q 380,25 400,25 L 410,10 L 418,42 L 426,5 L 435,30 L 445,25 T 500,25" fill="none" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                    </div>
+
+                    <!-- Vitals Grid -->
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-slate-900/90 border border-slate-800 p-2 rounded-lg flex justify-between items-center">
+                            <div>
+                                <span class="text-[9px] font-mono text-slate-400 block font-bold">HR</span>
+                                <span id="v-hr" class="text-xl font-bold font-mono-vital text-emerald-400">98</span> <span class="text-[9px] text-slate-500">BPM</span>
+                            </div>
+                            <i class="fa-solid fa-heartbeat text-emerald-500/40 text-lg heart-beat"></i>
+                        </div>
+
+                        <div class="bg-slate-900/90 border border-slate-800 p-2 rounded-lg flex justify-between items-center">
+                            <div>
+                                <span class="text-[9px] font-mono text-slate-400 block font-bold">BP</span>
+                                <span id="v-bp" class="text-lg font-bold font-mono-vital text-cyan-400">142/88</span> <span class="text-[9px] text-slate-500">mmHg</span>
+                            </div>
+                            <i class="fa-solid fa-gauge-high text-cyan-500/40 text-lg"></i>
+                        </div>
+
+                        <div class="bg-slate-900/90 border border-slate-800 p-2 rounded-lg flex justify-between items-center">
+                            <div>
+                                <span class="text-[9px] font-mono text-slate-400 block font-bold">SpO2</span>
+                                <span id="v-spo2" class="text-xl font-bold font-mono-vital text-sky-400">95%</span>
+                            </div>
+                            <i class="fa-solid fa-lungs text-sky-500/40 text-lg"></i>
+                        </div>
+
+                        <div class="bg-slate-900/90 border border-slate-800 p-2 rounded-lg flex justify-between items-center">
+                            <div>
+                                <span class="text-[9px] font-mono text-slate-400 block font-bold">RESP</span>
+                                <span id="v-rr" class="text-xl font-bold font-mono-vital text-amber-400">22</span> <span class="text-[9px] text-slate-500">/min</span>
+                            </div>
+                            <i class="fa-solid fa-wind text-amber-500/40 text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case History Tabs -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex-1 flex flex-col min-h-[220px]">
+                    <div class="flex border-b border-slate-800 mb-3 space-x-2">
+                        <button id="case-tab-hpi" onclick="setCaseHistoryTab('hpi')" class="px-3 py-1 text-xs font-semibold border-b-2 border-sky-500 text-sky-400">HPI History</button>
+                        <button id="case-tab-exam" onclick="setCaseHistoryTab('exam')" class="px-3 py-1 text-xs font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200">Physical Exam</button>
+                    </div>
+                    <div id="case-history-body" class="text-xs leading-relaxed text-slate-300 overflow-y-auto flex-1 pr-1">
+                        <!-- Dynamic text -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Diagnostics, Treatments, Differential Matrix (8 Cols) -->
+            <div class="lg:col-span-8 flex flex-col gap-4">
+                
+                <!-- Action Workspace Header & Submit -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex justify-between items-center flex-wrap gap-2">
+                    <div class="flex space-x-2">
+                        <button id="case-btn-diag" onclick="setCaseSubPanel('diag')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white">Diagnostics</button>
+                        <button id="case-btn-treat" onclick="setCaseSubPanel('treat')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Interventions</button>
+                        <button id="case-btn-ddx" onclick="setCaseSubPanel('ddx')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Differential Builder</button>
+                    </div>
+
+                    <button onclick="commitCaseDiagnosis()" class="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-md flex items-center gap-1.5">
+                        <i class="fa-solid fa-flag-checkered"></i> Submit Final Diagnosis
+                    </button>
+                </div>
+
+                <!-- SUB-PANEL: DIAGNOSTICS -->
+                <div id="case-subpanel-diag" class="space-y-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 mb-3 flex items-center gap-1.5">
+                            <i class="fa-solid fa-vial text-sky-400"></i> Order Lab Tests & Imaging
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="case-diag-buttons">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Diagnostic Results Log -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 min-h-[260px] flex flex-col">
+                        <h3 class="text-xs font-bold uppercase text-slate-300 border-b border-slate-800 pb-2 mb-3">Diagnostic Results Log</h3>
+                        <div id="case-diag-results" class="space-y-2 overflow-y-auto flex-1 pr-1">
+                            <p class="text-xs text-slate-500 text-center py-8">No tests ordered yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-PANEL: TREATMENTS -->
+                <div id="case-subpanel-treat" class="hidden space-y-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 mb-3 flex items-center gap-1.5">
+                            <i class="fa-solid fa-syringe text-emerald-400"></i> Administer Emergency Interventions
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="case-treat-buttons">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Treatment Log -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 min-h-[260px] flex flex-col">
+                        <h3 class="text-xs font-bold uppercase text-slate-300 border-b border-slate-800 pb-2 mb-3">Intervention History</h3>
+                        <div id="case-treat-results" class="space-y-2 overflow-y-auto flex-1 pr-1">
+                            <p class="text-xs text-slate-500 text-center py-8">No treatments administered yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-PANEL: DIFFERENTIAL MATRIX -->
+                <div id="case-subpanel-ddx" class="hidden space-y-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 mb-2">Build Differential Diagnosis</h3>
+                        <div class="flex gap-2">
+                            <select id="case-ddx-select" class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg p-2.5 flex-1 focus:outline-none">
+                                <!-- Dynamic options -->
+                            </select>
+                            <button onclick="addCaseDifferential()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Add to Working List</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 min-h-[260px] flex flex-col">
+                        <h3 class="text-xs font-bold uppercase text-slate-300 border-b border-slate-800 pb-2 mb-3">Clinical Evidence Matrix</h3>
+                        <div id="case-ddx-matrix" class="space-y-3 overflow-y-auto flex-1 pr-1">
+                            <p class="text-xs text-slate-500 text-center py-8">No differentials added to workspace.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- MODE 3: COURSE MASTERY QUIZ -->
+        <section id="view-quiz" class="hidden space-y-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm max-w-3xl mx-auto space-y-4">
+                
+                <!-- Quiz Progress Bar & Header -->
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <div>
+                        <span id="quiz-subject-tag" class="text-[10px] font-mono text-sky-400 font-bold uppercase">ANATOMY & PHYSIOLOGY</span>
+                        <h2 class="text-lg font-bold text-white">Board Review Mastery Quiz</h2>
+                    </div>
+                    <div class="text-right">
+                        <span id="quiz-question-counter" class="text-xs font-mono text-slate-400">Question 1 / 5</span>
+                    </div>
+                </div>
+
+                <!-- Question Box -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <p id="quiz-question-text" class="text-sm text-slate-200 font-medium leading-relaxed">
+                        Question text will load here...
+                    </p>
+                </div>
+
+                <!-- Answer Options -->
+                <div class="space-y-2.5" id="quiz-options-container">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Explanation Rationale Box -->
+                <div id="quiz-rationale-box" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2">
+                    <div id="quiz-rationale-header" class="text-xs font-bold uppercase flex items-center gap-1.5">
+                        <!-- Correct/Incorrect badge -->
+                    </div>
+                    <p id="quiz-rationale-text" class="text-xs text-slate-300 leading-relaxed font-sans">
+                        Rationale text...
+                    </p>
+                </div>
+
+                <!-- Action Button -->
+                <div class="flex justify-end pt-2">
+                    <button id="btn-quiz-next" onclick="nextQuizQuestion()" class="hidden bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition">
+                        Next Question &rarr;
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODE 4: VISUAL & MICROSCOPIC LAB -->
+        <section id="view-vislab" class="hidden space-y-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm max-w-4xl mx-auto space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <div>
+                        <span class="text-[10px] font-mono text-emerald-400 font-bold uppercase">HISTOPATHOLOGY & ANATOMY IDENTIFIER</span>
+                        <h2 class="text-lg font-bold text-white">Interactive Visual Slide Lab</h2>
+                    </div>
+                    <span id="vislab-score-display" class="text-xs font-mono text-amber-400">Score: 0 / 100</span>
+                </div>
+
+                <!-- Visual Identification Card -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Graphic/SVG Simulator Viewport -->
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center min-h-[260px] relative overflow-hidden" id="vislab-viewport">
+                        <!-- Injected SVG Visual Asset -->
+                    </div>
+
+                    <!-- Slide Information & Pin Options -->
+                    <div class="flex flex-col justify-between space-y-3">
+                        <div>
+                            <span class="text-[10px] font-mono text-slate-400 uppercase">Slide Specification</span>
+                            <h3 id="vislab-slide-title" class="text-base font-bold text-slate-200">Histopathology Sample #04</h3>
+                            <p id="vislab-slide-desc" class="text-xs text-slate-400 mt-1 leading-relaxed">Examine the highlighted cell feature in the microscopy viewport.</p>
+                        </div>
+
+                        <div class="space-y-2" id="vislab-options-container">
+                            <!-- Visual options rendered here -->
+                        </div>
+
+                        <div id="vislab-feedback" class="text-xs p-2.5 rounded-lg hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- USER PROFILE MODAL -->
+    <div id="modal-profile" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="closeProfileModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <div class="w-12 h-12 rounded-full bg-sky-500/20 border border-sky-500/40 text-sky-400 flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white">Student Profile & Cloud Sync</h3>
+                    <p id="user-id-display" class="text-[11px] font-mono text-slate-400 truncate max-w-[240px]">Connecting...</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-1">
+                    <span class="text-slate-400 block text-[10px] font-mono uppercase">Current Level</span>
+                    <span id="profile-level" class="text-lg font-bold text-amber-400">Level 1</span>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-1">
+                    <span class="text-slate-400 block text-[10px] font-mono uppercase">Total Experience</span>
+                    <span id="profile-xp" class="text-lg font-bold text-emerald-400">120 XP</span>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-1">
+                    <span class="text-slate-400 block text-[10px] font-mono uppercase">Streak</span>
+                    <span id="profile-streak" class="text-lg font-bold text-sky-400">1 Days</span>
+                </div>
+                <div class="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-1">
+                    <span class="text-slate-400 block text-[10px] font-mono uppercase">Cloud Status</span>
+                    <span id="profile-sync-status" class="text-xs font-bold text-emerald-400 flex items-center gap-1 mt-1">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Synced
+                    </span>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="saveUserProfileToCloud()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Force Save Progress to Cloud
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER / CREDIT -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-center py-3 text-[11px] text-slate-500">
+        MedVet Quest & Clinical Academy • Integrated Medical & Veterinary Education Engine
+    </footer>
+
+    <!-- FIREBASE MODULE & SCRIPT ENGINE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // APP & FIREBASE INITIALIZATION
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'medvet-quest-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-key",
+            authDomain: "demo.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo.appspot.com",
+            messagingSenderId: "123456",
+            appId: "1:123456:web:123456"
+        };
+
+        let app, db, auth;
+        let currentUser = null;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // AUTHENTICATION FLOW
+            const initAuth = async () => {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            };
+
+            initAuth();
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    window.currentUser = user;
+                    document.getElementById('user-id-display').innerText = `ID: ${user.uid}`;
+                    await loadUserProfileFromCloud();
+                }
+            });
+        } catch (e) {
+            console.log("Firebase initialized in standalone/offline mode.");
+        }
+
+        // CLOUD PERSISTENCE FUNCTIONS
+        window.saveUserProfileToCloud = async function() {
+            if (!currentUser || !db) return;
+            try {
+                const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'userdata');
+                await setDoc(userDocRef, {
+                    level: window.state.level,
+                    xp: window.state.xp,
+                    streak: window.state.streak,
+                    track: window.state.track,
+                    vetSpecies: window.state.vetSpecies,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+                document.getElementById('profile-sync-status').innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Synced`;
+            } catch (err) {
+                console.error("Cloud save failed", err);
+            }
+        };
+
+        window.loadUserProfileFromCloud = async function() {
+            if (!currentUser || !db) return;
+            try {
+                const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'userdata');
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.level) window.state.level = data.level;
+                    if (data.xp !== undefined) window.state.xp = data.xp;
+                    if (data.streak) window.state.streak = data.streak;
+                    if (data.track) window.setTrack(data.track);
+                    window.updateUIStats();
+                } else {
+                    await window.saveUserProfileToCloud();
+                }
+            } catch (err) {
+                console.error("Cloud load failed", err);
+            }
+        };
+    </script>
+
+    <script>
+        /* ==========================================================================
+           DATA STORE & CURRICULUM DEFINITIONS
+           ========================================================================== */
+        const DISCIPLINE_COURSES = [
+            { id: 'anatomy', name: 'Anatomy & Histology', icon: 'fa-bone', color: 'text-amber-400', desc: 'Gross anatomical structures, comparative osteology, histology slide identification across human and veterinary species.' },
+            { id: 'physiology', name: 'Physiology & Biochemistry', icon: 'fa-heart-pulse', color: 'text-emerald-400', desc: 'Organ system dynamics, acid-base balance, cellular signaling, electrolyte homeostasis, and enzyme biochemistry.' },
+            { id: 'microbiology', name: 'Microbiology & Immunology', icon: 'fa-virus', color: 'text-sky-400', desc: 'Bacteriology, virology, mycology, veterinary & human parasitology, cellular immune responses, and hypersensitivity.' },
+            { id: 'pharmacology', name: 'Pharmacology & Therapeutics', icon: 'fa-pills', color: 'text-purple-400', desc: 'Mechanism of action, receptor binding, drug clearance, species-specific toxicity (e.g. Permethrin in feline), and dosages.' },
+            { id: 'pathology', name: 'Pathology & Pathophysiology', icon: 'fa-microscope', color: 'text-rose-400', desc: 'Cellular injury, neoplasia, gross necropsy lesions, inflammation pathways, and systemic histopathology.' },
+            { id: 'surgery', name: 'Surgery & Anaesthesiology', icon: 'fa-scalpel', color: 'text-cyan-400', desc: 'Surgical anatomy, aseptic technique, suture patterns, anesthetic protocols (ASA status), and intraoperative emergencies.' }
+        ];
+
+        // CLINICAL CASES FOR BOTH TRACKS
+        const CASE_DATABASE = {
+            human: {
+                id: 'human-01',
+                species: 'Human Patient',
+                name: 'Arthur Pendelton',
+                demo: '62 yo Male • DOB: 08/14/1964 • MRN: #482-901',
+                cc: 'Severe crushing substernal chest pressure for 45 minutes.',
+                allergies: 'Penicillin (Anaphylaxis)',
+                vitals: { hr: 104, bp: '158/92', spo2: '94%', rr: 22, stability: 'STABLE' },
+                hpi: "Patient is a 62-year-old male presenting with acute crushing chest pressure radiating to the left shoulder and jaw. Associated with diaphoresis and nausea.",
+                exam: "GEN: Diaphoretic, pale, holding fist over sternum.\nCARDIO: Tachycardic, regular rhythm, no murmurs.\nRESP: Tachypneic, clear breath sounds bilaterally.",
+                diagnostics: [
+                    { id: 'ecg', name: '12-Lead ECG', result: 'ST-segment elevation of 3.5mm in V1-V4 with reciprocal depression in II, III, aVF. Diagnosis: Acute Anterior STEMI.' },
+                    { id: 'trop', name: 'Cardiac Troponin I', result: 'Troponin I: 4.85 ng/mL (CRITICAL HIGH, Ref < 0.04 ng/mL).' },
+                    { id: 'cxr', name: 'Portable Chest X-Ray', result: 'Normal cardiothoracic ratio, clear lung parenchyma, no mediastinal widening.' }
+                ],
+                treatments: [
+                    { id: 'asp', name: 'Aspirin 324mg Chewable', result: 'Antiplatelet therapy administered STAT.' },
+                    { id: 'nitro', name: 'Sublingual Nitroglycerin', result: 'Chest pressure reduced from 8/10 to 4/10.' },
+                    { id: 'pci', name: 'Emergency PCI / Cath Lab', result: 'Cardiac Cath lab team activated for emergency reperfusion.' }
+                ],
+                targetDdx: 'STEMI',
+                ddxOptions: [
+                    { id: 'STEMI', name: 'Acute STEMI (Coronary Occlusion)', target: true },
+                    { id: 'PE', name: 'Pulmonary Embolism', target: false },
+                    { id: 'DISSECTION', name: 'Aortic Dissection', target: false }
+                ]
+            },
+            vet: {
+                Canine: {
+                    id: 'vet-canine-01',
+                    species: 'Canine (Dog)',
+                    name: 'Barnaby (Great Dane)',
+                    demo: '4 yo Male Intact • Weight: 54 kg • Microchip: #982-110',
+                    cc: 'Acute abdominal distension, non-productive retching, restlessness.',
+                    allergies: 'None reported',
+                    vitals: { hr: 160, bp: '82/50', spo2: '91%', rr: 38, stability: 'CRITICAL' },
+                    hpi: "Barnaby ate a large meal 2 hours ago and exercised immediately after. Owner observed sudden onset abdominal enlargement, continuous unsuccessful attempts to vomit, and collapse.",
+                    exam: "GEN: Tachycardic, weak pulses, dark muddy mucous membranes, CRT > 3 seconds.\nABDOMEN: Markedly distended, tympanic upon percussion, painful.",
+                    diagnostics: [
+                        { id: 'rad', name: 'Right Lateral Abdominal X-Ray', result: 'Classic "Double Bubble" / "Popeye Arm" sign indicating gastric displacement and volvulus.' },
+                        { id: 'lactate', name: 'Blood Lactate', result: 'Lactate: 6.4 mmol/L (Severe tissue hypoperfusion/ischemia).' }
+                    ],
+                    treatments: [
+                        { id: 'trocar', name: 'Percutaneous Trocarization (Decompression)', result: 'Significant release of gas under pressure; heart rate improved to 120 bpm.' },
+                        { id: 'fluids', name: 'Shock Fluid Therapy (LRS 90mL/kg/hr)', result: 'Blood pressure improved to 105/65 mmHg.' },
+                        { id: 'surgery', name: 'Emergency Gastropexy & Resection', result: 'Patient prepared for surgical derotation and incisional gastropexy.' }
+                    ],
+                    targetDdx: 'GDV',
+                    ddxOptions: [
+                        { id: 'GDV', name: 'Gastric Dilvulus Volvulus (GDV)', target: true },
+                        { id: 'SPLENIC', name: 'Acute Splenic Torsion', target: false },
+                        { id: 'FOREIGN', name: 'Gastrointestinal Foreign Body', target: false }
+                    ]
+                }
+            }
+        };
+
+        // QUIZ QUESTIONS DATABASE
+        const QUIZ_DATABASE = {
+            human: [
+                {
+                    subject: 'Pharmacology & Therapeutics',
+                    question: 'A 55-year-old patient with congestive heart failure is prescribed a medication that inhibits Na+/K+-ATPase, increasing intracellular calcium. Which drug was prescribed?',
+                    options: ['Furosemide', 'Digoxin', 'Lisinopril', 'Metoprolol'],
+                    correct: 1,
+                    rationale: 'Digoxin selectively inhibits the Na+/K+-ATPase pump, increasing intracellular sodium, which reduces Na+/Ca2+ exchange and elevates intracellular calcium, enhancing cardiac inotropy.'
+                },
+                {
+                    subject: 'Microbiology & Immunology',
+                    question: 'Which pathogen is a Gram-positive, catalase-positive, coagulase-positive coccus that frequently causes acute bacterial endocarditis in IV drug users?',
+                    options: ['Streptococcus pneumoniae', 'Staphylococcus aureus', 'Enterococcus faecalis', 'Streptococcus viridans'],
+                    correct: 1,
+                    rationale: 'Staphylococcus aureus is catalase-positive and coagulase-positive, making it the primary cause of acute bacterial endocarditis involving native tricuspid valves.'
+                }
+            ],
+            vet: [
+                {
+                    subject: 'Pharmacology (Species Toxicity)',
+                    question: 'Which over-the-counter flea treatment ingredient is severely TOXIC to Felines due to deficient hepatic glucuronidation pathways?',
+                    options: ['Fipronil', 'Imidacloprid', 'Permethrin', 'Milbemycin'],
+                    correct: 2,
+                    rationale: 'Permethrin (a synthetic pyrethroid) causes severe neurotoxicity, tremors, and seizures in cats due to their inability to metabolize it effectively via hepatic glucuronidation.'
+                },
+                {
+                    subject: 'Anatomy & Physiology (Comparative)',
+                    question: 'In equine gastrointestinal anatomy, where is the most common site for impaction colic due to sharp luminal narrowing?',
+                    options: ['Pelvic Flexure', 'Cecum', 'Jejunum', 'Right Dorsal Colon'],
+                    correct: 0,
+                    rationale: 'The pelvic flexure is a 180-degree turn where the left ventral colon transitions to the left dorsal colon while narrowing significantly in diameter, making it a classic site for impaction.'
+                }
+            ]
+        };
+
+        // VISUAL LAB DATA
+        const VISLAB_SLIDES = [
+            {
+                title: 'Histopathology: Glomerulus',
+                desc: 'Identify the cell population forming the visceral layer of Bowman space.',
+                options: ['Podocytes', 'Mesangial Cells', 'Endothelial Cells', 'Proximal Tubule Epithelium'],
+                correct: 0,
+                svg: `<svg viewBox="0 0 200 200" class="w-48 h-48 text-rose-400"><circle cx="100" cy="100" r="80" fill="#fda4af" opacity="0.2" stroke="#f43f5e" stroke-width="4"/><circle cx="100" cy="100" r="50" fill="#fb7185" opacity="0.4"/><circle cx="80" cy="90" r="8" fill="#be123c"/><circle cx="120" cy="110" r="8" fill="#be123c"/><circle cx="110" cy="75" r="8" fill="#be123c"/><text x="65" y="105" fill="#fff" font-size="10" font-weight="bold">PIN #1</text></svg>`
+            }
+        ];
+
+        /* ==========================================================================
+        /* GAME STATE ENGINE */
+        let state = {
+            track: 'human', // 'human' or 'vet'
+            vetSpecies: 'Canine',
+            level: 1,
+            xp: 120,
+            streak: 1,
+            currentQuizIndex: 0,
+            activeCaseHistoryTab: 'hpi',
+            activeCaseSubPanel: 'diag',
+            activeCaseDiagnostics: [],
+            activeCaseTreatments: [],
+            activeCaseDdx: []
+        };
+        window.state = state;
+
+        /* AUDIO SYNTHESIZER */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type = 'sine', duration = 0.1) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        /* INITIALIZATION */
+        window.onload = function() {
+            renderDisciplinesGrid();
+            loadCaseData();
+            loadQuizQuestion();
+            loadVisLabSlide();
+            registerPWA();
+        };
+
+        function updateUIStats() {
+            document.getElementById('user-level').innerText = state.level;
+            document.getElementById('user-xp-text').innerText = `${state.xp}/500 XP`;
+            document.getElementById('user-xp-bar').style.width = `${(state.xp / 500) * 100}%`;
+            document.getElementById('user-streak').innerText = `${state.streak} Day Streak`;
+
+            document.getElementById('profile-level').innerText = `Level ${state.level}`;
+            document.getElementById('profile-xp').innerText = `${state.xp} XP`;
+            document.getElementById('profile-streak').innerText = `${state.streak} Days`;
+        }
+        window.updateUIStats = updateUIStats;
+
+        function setTrack(track) {
+            state.track = track;
+            const logoBadge = document.getElementById('track-logo-badge');
+            const logoIcon = document.getElementById('track-logo-icon');
+            const trackPill = document.getElementById('track-pill');
+            const btnHuman = document.getElementById('btn-track-human');
+            const btnVet = document.getElementById('btn-track-vet');
+            const speciesWrap = document.getElementById('species-selector-wrapper');
+
+            if (track === 'human') {
+                logoBadge.className = "bg-sky-600 text-white p-2 rounded-xl flex items-center justify-center shadow-md";
+                logoIcon.className = "fa-solid fa-user-doctor text-xl";
+                trackPill.innerText = "HUMAN MEDICINE TRACK";
+                trackPill.className = "text-[10px] bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full font-mono font-semibold uppercase";
+                
+                btnHuman.className = "px-3 py-1.5 rounded-md font-semibold text-white bg-sky-600 transition flex items-center gap-1.5";
+                btnVet.className = "px-3 py-1.5 rounded-md font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
+                speciesWrap.classList.add('hidden');
+            } else {
+                logoBadge.className = "bg-emerald-600 text-white p-2 rounded-xl flex items-center justify-center shadow-md";
+                logoIcon.className = "fa-solid fa-paw text-xl";
+                trackPill.innerText = "VETERINARY MEDICINE TRACK";
+                trackPill.className = "text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono font-semibold uppercase";
+
+                btnHuman.className = "px-3 py-1.5 rounded-md font-semibold text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
+                btnVet.className = "px-3 py-1.5 rounded-md font-semibold text-white bg-emerald-600 transition flex items-center gap-1.5";
+                speciesWrap.classList.remove('hidden');
+                speciesWrap.classList.add('flex');
+            }
+
+            playTone(track === 'human' ? 523 : 659, 'triangle');
+            loadCaseData();
+            loadQuizQuestion();
+            if (window.saveUserProfileToCloud) window.saveUserProfileToCloud();
+        }
+        window.setTrack = setTrack;
+
+        /* MODAL PROFILE FUNCTIONS */
+        function openProfileModal() {
+            updateUIStats();
+            document.getElementById('modal-profile').classList.remove('hidden');
+        }
+        function closeProfileModal() {
+            document.getElementById('modal-profile').classList.add('hidden');
+        }
+
+        /* GAMIFICATION (XP & LEVEL) */
+        function addXP(amount) {
+            state.xp += amount;
+            if (state.xp >= 500) {
+                state.level++;
+                state.xp -= 500;
+                playTone(1318, 'sine', 0.4);
+                alert(`🌟 LEVEL UP! You reached Level ${state.level}!`);
+            }
+            updateUIStats();
+            if (window.saveUserProfileToCloud) window.saveUserProfileToCloud();
+        }
+
+        /* PWA REGISTRATION & MANIFEST GENERATOR */
+        let deferredPrompt;
+        function registerPWA() {
+            // Dynamically generate web manifest
+            const manifest = {
+                name: "MedVet Quest & Clinical Academy",
+                short_name: "MedVetQuest",
+                start_url: "./",
+                display: "standalone",
+                background_color: "#0f172a",
+                theme_color: "#0284c7",
+                icons: [{
+                    src: "https://placehold.co/192x192/0284c7/ffffff?text=MedVet",
+                    sizes: "192x192",
+                    type: "image/png"
+                }, {
+                    src: "https://placehold.co/512x512/0284c7/ffffff?text=MedVet",
+                    sizes: "512x512",
+                    type: "image/png"
+                }]
+            };
+            const stringManifest = JSON.stringify(manifest);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestURL;
+            document.head.appendChild(link);
+
+            // Register inline service worker
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => self.clients.claim());
+                    self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
+                `;
+                const swBlob = new Blob([swCode], {type: 'text/javascript'});
+                const swURL = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swURL).catch(err => console.log('SW registration note:', err));
+            }
+
+            // Capture install prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('pwa-install-banner').classList.remove('hidden');
+            });
+
+            document.getElementById('btn-pwa-install').addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const choice = await deferredPrompt.userChoice;
+                    if (choice.outcome === 'accepted') {
+                        document.getElementById('pwa-install-banner').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                }
+            });
+        }
+
+        function dismissPWAInstall() {
+            document.getElementById('pwa-install-banner').classList.add('hidden');
+        }
+
+        /* ... remaining logic functions ... */
+
+            document.getElementById(`case-subpanel-${panel}`).classList.remove('hidden');
+            document.getElementById(`case-btn-${panel}`).className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white";
+        }
+
+        function renderCaseDiagnosticsButtons(activeCase) {
+            const container = document.getElementById('case-diag-buttons');
+            container.innerHTML = '';
+            activeCase.diagnostics.forEach(diag => {
+                const btn = document.createElement('button');
+                btn.className = "p-2 bg-slate-950 border border-slate-800 hover:border-sky-500/50 rounded-lg text-xs text-left font-medium text-slate-200 transition";
+                btn.innerText = diag.name;
+                btn.onclick = () => {
+                    if (!state.activeCaseDiagnostics.includes(diag.id)) {
+                        state.activeCaseDiagnostics.push(diag.id);
+                        const resultsLog = document.getElementById('case-diag-results');
+                        if (state.activeCaseDiagnostics.length === 1) resultsLog.innerHTML = '';
+                        resultsLog.innerHTML += `
+                            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs space-y-1">
+                                <span class="font-bold text-sky-400">${diag.name}</span>
+                                <p class="text-slate-300 font-mono text-[11px]">${diag.result}</p>
+                            </div>
+                        `;
+                        playTone(880, 'sine');
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderCaseTreatmentsButtons(activeCase) {
+            const container = document.getElementById('case-treat-buttons');
+            container.innerHTML = '';
+            activeCase.treatments.forEach(treat => {
+                const btn = document.createElement('button');
+                btn.className = "p-2 bg-slate-950 border border-slate-800 hover:border-emerald-500/50 rounded-lg text-xs text-left font-medium text-slate-200 transition";
+                btn.innerText = treat.name;
+                btn.onclick = () => {
+                    if (!state.activeCaseTreatments.includes(treat.id)) {
+                        state.activeCaseTreatments.push(treat.id);
+                        const resultsLog = document.getElementById('case-treat-results');
+                        if (state.activeCaseTreatments.length === 1) resultsLog.innerHTML = '';
+                        resultsLog.innerHTML += `
+                            <div class="p-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs space-y-1">
+                                <span class="font-bold text-emerald-400">${treat.name}</span>
+                                <p class="text-slate-300 font-mono text-[11px]">${treat.result}</p>
+                            </div>
+                        `;
+                        playTone(1046, 'square');
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function setupCaseDdxDropdown(activeCase) {
+            const select = document.getElementById('case-ddx-select');
+            select.innerHTML = '';
+            activeCase.ddxOptions.forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt.id;
+                el.innerText = opt.name;
+                select.appendChild(el);
+            });
+        }
+
+        function addCaseDifferential() {
+            const select = document.getElementById('case-ddx-select');
+            const val = select.value;
+            if (!val || state.activeCaseDdx.includes(val)) return;
+
+            state.activeCaseDdx.push(val);
+            const matrix = document.getElementById('case-ddx-matrix');
+            if (state.activeCaseDdx.length === 1) matrix.innerHTML = '';
+
+            const activeCase = (state.track === 'human') ? CASE_DATABASE.human : (CASE_DATABASE.vet[state.vetSpecies] || CASE_DATABASE.vet['Canine']);
+            const optionObj = activeCase.ddxOptions.find(o => o.id === val);
+
+            matrix.innerHTML += `
+                <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg text-xs flex justify-between items-center">
+                    <span class="font-bold text-amber-300">${optionObj.name}</span>
+                    <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950 border border-emerald-800 px-2 py-0.5 rounded">Active Differential</span>
+                </div>
+            `;
+            playTone(659, 'triangle');
+        }
+
+        function commitCaseDiagnosis() {
+            let activeCase = (state.track === 'human') ? CASE_DATABASE.human : (CASE_DATABASE.vet[state.vetSpecies] || CASE_DATABASE.vet['Canine']);
+            
+            if (state.activeCaseDdx.includes(activeCase.targetDdx)) {
+                addXP(100);
+                alert(`🎉 CLINICAL SUCCESS!\n\nCorrect primary diagnosis submitted: ${activeCase.targetDdx}.\nYou awarded +100 XP.`);
+                playTone(1200, 'sine', 0.3);
+            } else {
+                alert(`⚠️ CASE EVALUATION\n\nYour working differential list did not include the targeted primary pathology (${activeCase.targetDdx}). Review clinical diagnostics.`);
+                playTone(300, 'sawtooth', 0.3);
+            }
+        }
+
+        /* QUIZ ENGINE */
+        function loadQuizQuestion() {
+            const list = QUIZ_DATABASE[state.track];
+            const q = list[state.currentQuizIndex % list.length];
+
+            document.getElementById('quiz-subject-tag').innerText = q.subject;
+            document.getElementById('quiz-question-text').innerText = q.question;
+            document.getElementById('quiz-question-counter').innerText = `Question ${(state.currentQuizIndex % list.length) + 1} / ${list.length}`;
+
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+            document.getElementById('quiz-rationale-box').classList.add('hidden');
+            document.getElementById('btn-quiz-next').classList.add('hidden');
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-sky-500/50 text-xs font-medium text-slate-200 transition flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-slate-600"></i>`;
+                btn.onclick = () => selectQuizOption(idx, q.correct, q.rationale);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectQuizOption(selectedIdx, correctIdx, rationale) {
+            const container = document.getElementById('quiz-options-container');
+            const buttons = container.querySelectorAll('button');
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === correctIdx) {
+                    btn.className = "w-full text-left p-3 rounded-xl bg-emerald-950/80 border border-emerald-500 text-xs font-medium text-emerald-200 transition flex items-center justify-between";
+                    btn.innerHTML += `<i class="fa-solid fa-circle-check text-emerald-400"></i>`;
+                } else if (idx === selectedIdx) {
+                    btn.className = "w-full text-left p-3 rounded-xl bg-rose-950/80 border border-rose-500 text-xs font-medium text-rose-200 transition flex items-center justify-between";
+                    btn.innerHTML += `<i class="fa-solid fa-circle-xmark text-rose-400"></i>`;
+                }
+            });
+
+            const ratBox = document.getElementById('quiz-rationale-box');
+            const ratHeader = document.getElementById('quiz-rationale-header');
+            const ratText = document.getElementById('quiz-rationale-text');
+
+            ratBox.classList.remove('hidden');
+            if (selectedIdx === correctIdx) {
+                ratHeader.innerHTML = `<span class="text-emerald-400"><i class="fa-solid fa-check mr-1"></i> CORRECT ANSWER (+25 XP)</span>`;
+                addXP(25);
+                playTone(987, 'sine', 0.2);
+            } else {
+                ratHeader.innerHTML = `<span class="text-rose-400"><i class="fa-solid fa-xmark mr-1"></i> INCORRECT</span>`;
+                playTone(350, 'sawtooth', 0.2);
+            }
+
+            ratText.innerText = rationale;
+            document.getElementById('btn-quiz-next').classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            state.currentQuizIndex++;
+            loadQuizQuestion();
+        }
+
+        /* VISUAL LAB ENGINE */
+        function loadVisLabSlide() {
+            const slide = VISLAB_SLIDES[0];
+            document.getElementById('vislab-viewport').innerHTML = slide.svg;
+            document.getElementById('vislab-slide-title').innerText = slide.title;
+            document.getElementById('vislab-slide-desc').innerText = slide.desc;
+
+            const container = document.getElementById('vislab-options-container');
+            container.innerHTML = '';
+            slide.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-2.5 rounded-lg bg-slate-950 border border-slate-800 hover:border-emerald-500/50 text-xs text-slate-200 font-medium transition";
+                btn.innerText = opt;
+                btn.onclick = () => {
+                    const fb = document.getElementById('vislab-feedback');
+                    fb.classList.remove('hidden');
+                    if (idx === slide.correct) {
+                        fb.className = "text-xs p-2.5 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-300 font-bold";
+                        fb.innerText = "Correct Identification! Podocytes wrap around glomerular capillaries.";
+                        addXP(30);
+                        playTone(1046, 'sine');
+                    } else {
+                        fb.className = "text-xs p-2.5 rounded-lg bg-rose-950 border border-rose-800 text-rose-300 font-bold";
+                        fb.innerText = "Incorrect. Re-examine histological cell markers.";
+                        playTone(300, 'triangle');
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        /* GAMIFICATION (XP & LEVEL) */
+        function addXP(amount) {
+            state.xp += amount;
+            if (state.xp >= 500) {
+                state.level++;
+                state.xp -= 500;
+                playTone(1318, 'sine', 0.4);
+                alert(`🌟 LEVEL UP! You reached Level ${state.level}!`);
+            }
+            document.getElementById('user-level').innerText = state.level;
+            document.getElementById('user-xp-text').innerText = `${state.xp}/500 XP`;
+            document.getElementById('user-xp-bar').style.width = `${(state.xp / 500) * 100}%`;
+        }
+
+        /* THEME TOGGLE */
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = "fa-solid fa-sun text-amber-400 text-xs";
+            } else {
+                html.classList.add('dark');
+                icon.className = "fa-solid fa-moon text-xs";
+            }
+        }
+    </script>
+</body>
+</html>
+```
